@@ -1,0 +1,198 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── DCDS Brand Colors (from club logo) ── */
+  --color-primary: #1B8FD8;       /* Cerulean Blue  */
+  --color-primary-dark: #1470B0;
+  --color-primary-light: #4AAEE8;
+
+  --color-gold: #F0C040;          /* Golden Yellow  */
+  --color-gold-dark: #D4A820;
+  --color-gold-light: #F5D060;
+
+  --color-crimson: #C41230;       /* Crimson Red    */
+  --color-crimson-dark: #9E0E26;
+  --color-crimson-light: #E83050;
+
+  --color-forest: #1B6B32;        /* Forest Green   */
+  --color-forest-dark: #145228;
+  --color-forest-light: #268842;
+
+  --color-navy: #0A1628;          /* Deep Navy      */
+  --color-navy-mid: #0F2040;
+  --color-navy-soft: #152B55;
+
+  /* ── Neutral Palette ── */
+  --color-surface: #F8FAFF;
+  --color-surface-dark: #0D1B2E;
+  --color-muted: #94A3B8;
+  --color-border: #E2E8F0;
+  --color-border-dark: #1E3050;
+
+  /* ── Typography ── */
+  --font-sans: 'Inter', 'Outfit', sans-serif;
+  --font-display: 'Outfit', sans-serif;
+
+  /* ── Animations ── */
+  --animate-fade-in: fade-in 0.6s ease-out both;
+  --animate-slide-up: slide-up 0.6s ease-out both;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-spin-slow: spin 8s linear infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+
+/* ── Global Reset & Base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-surface);
+  color: #1E293B;
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark body {
+  background-color: var(--color-surface-dark);
+  color: #E2E8F0;
+}
+
+/* ── Utility Classes ── */
+.gradient-brand {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-navy) 100%);
+}
+
+.gradient-gold {
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-crimson) 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-gold {
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.glass-dark {
+  background: rgba(10, 22, 40, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(27, 143, 216, 0.2);
+}
+
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(27, 143, 216, 0.2);
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+  background-size: 200% auto;
+  animation: var(--animate-shimmer);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-navy); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-primary-light); }
+
+/* ── Selection ── */
+::selection {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* ── Focus Visible ── */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ── Section Utilities ── */
+.section-padding {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+@media (min-width: 768px) {
+  .section-padding {
+    padding-top: 7rem;
+    padding-bottom: 7rem;
+  }
+}
+
+.container-custom {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* ── Status Badge Colors ── */
+.badge-active   { background: #16A34A20; color: #16A34A; border: 1px solid #16A34A40; }
+.badge-pending  { background: #F59E0B20; color: #D97706; border: 1px solid #F59E0B40; }
+.badge-inactive { background: #6B728020; color: #6B7280; border: 1px solid #6B728040; }
+.badge-suspended{ background: #DC262620; color: #DC2626; border: 1px solid #DC262640; }
+
+/* ── Prose Overrides ── */
+.prose-dcds h1, .prose-dcds h2, .prose-dcds h3 {
+  color: var(--color-primary);
+}
