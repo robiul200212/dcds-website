@@ -128,7 +128,7 @@ export function RegistrationsManager() {
                       { icon: Phone, label: 'Phone', value: reg.phone },
                       { icon: BookOpen, label: 'Student ID', value: reg.student_id },
                       { icon: BookOpen, label: 'Department', value: reg.department },
-                      { icon: Clock, label: 'Session / Batch', value: `${reg.session} / ${reg.batch}` },
+                      { icon: Clock, label: 'Session', value: reg.session },
                       { icon: CreditCard, label: 'Payment Ref', value: reg.payment_ref || '—' },
                       { icon: Clock, label: 'Applied', value: formatDate(reg.created_at) },
                     ].map(({ icon: Icon, label, value }) => (

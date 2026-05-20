@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   student_id            TEXT,
   department            TEXT,
   session               TEXT,   -- e.g. "2022-23"
-  batch                 TEXT,   -- e.g. "32nd"
   avatar_url            TEXT,
   bio                   TEXT,
   role                  TEXT NOT NULL DEFAULT 'member' 
@@ -82,7 +81,6 @@ CREATE TABLE IF NOT EXISTS public.registration_requests (
   student_id            TEXT NOT NULL,
   department            TEXT NOT NULL,
   session               TEXT NOT NULL,
-  batch                 TEXT NOT NULL,
   why_join              TEXT,
   payment_screenshot_url TEXT,
   payment_ref           TEXT,

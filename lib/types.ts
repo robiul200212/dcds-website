@@ -10,7 +10,6 @@ export interface Profile {
   student_id: string | null
   department: string | null
   session: string | null
-  batch: string | null
   avatar_url: string | null
   bio: string | null
   role: UserRole
@@ -154,7 +153,6 @@ export interface RegistrationRequest {
   student_id: string
   department: string
   session: string
-  batch: string
   why_join: string | null
   payment_screenshot_url: string | null
   payment_ref: string | null

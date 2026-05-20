@@ -20,7 +20,6 @@ const schema = z.object({
   student_id: z.string().min(4, 'Enter your student ID'),
   department: z.string().min(2, 'Select your department'),
   session: z.string().min(4, 'Enter your session e.g. 2022-23'),
-  batch: z.string().min(1, 'Enter your batch e.g. 32nd'),
   why_join: z.string().min(30, 'Please write at least 30 characters').max(500).optional().or(z.literal('')),
   payment_ref: z.string().min(5, 'Enter your payment reference/transaction ID'),
   agree_terms: z.boolean().refine(v => v === true, 'You must agree to terms'),
@@ -32,11 +31,14 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 const departments = [
-  'Bangla', 'English', 'Arabic', 'History', 'Islamic History', 'Philosophy',
-  'Economics', 'Political Science', 'Sociology', 'Social Work',
-  'Physics', 'Chemistry', 'Mathematics', 'Statistics', 'Botany', 'Zoology',
-  'Geography', 'Psychology', 'Accounting', 'Management', 'Finance & Banking',
-  'Marketing', 'Law', 'Computer Science', 'Other',
+  'HSC Science', 'HSC Commerce', 'HSC Arts', 'Department of Physics', 'Department of Chemistry',
+  'Department of Mathematics', 'Department of Botany', 'Department of Zoology',
+  'Department of Geography and Environment', 'Department of Soil Science',
+  'Department of Psychology', 'Department of Statistics', 'Department of Bengali',
+  'Department of English', 'Department of History', 'Department of Islamic History and Culture',
+  'Department of Philosophy', 'Department of Economics', 'Department of Political Science',
+  'Department of Sociology', 'Department of Islamic Studies', 'Department of Accounting',
+  'Department of Management'
 ]
 
 const STEPS = ['Account', 'Personal', 'Payment', 'Review']
@@ -68,7 +70,7 @@ export default function RegisterPage() {
   const nextStep = async () => {
     const fieldsPerStep: Record<number, (keyof FormData)[]> = {
       0: ['full_name', 'email', 'password', 'confirm_password'],
-      1: ['phone', 'student_id', 'department', 'session', 'batch'],
+      1: ['phone', 'student_id', 'department', 'session'],
       2: ['payment_ref'],
     }
     const valid = await trigger(fieldsPerStep[step])
@@ -110,7 +112,6 @@ export default function RegisterPage() {
         student_id: data.student_id,
         department: data.department,
         session: data.session,
-        batch: data.batch,
         payment_ref: data.payment_ref,
         payment_screenshot_url: paymentUrl,
         membership_status: 'pending',
@@ -126,7 +127,6 @@ export default function RegisterPage() {
         student_id: data.student_id,
         department: data.department,
         session: data.session,
-        batch: data.batch,
         why_join: data.why_join || null,
         payment_ref: data.payment_ref,
         payment_screenshot_url: paymentUrl,
@@ -273,19 +273,11 @@ export default function RegisterPage() {
                   </div>
                   {errors.department && <p className="text-xs text-[#C41230] mt-1">{errors.department.message}</p>}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Session *</label>
-                    <input type="text" {...register('session')} placeholder="e.g. 2022-23"
-                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm" />
-                    {errors.session && <p className="text-xs text-[#C41230] mt-1">{errors.session.message}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Batch *</label>
-                    <input type="text" {...register('batch')} placeholder="e.g. 32nd"
-                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm" />
-                    {errors.batch && <p className="text-xs text-[#C41230] mt-1">{errors.batch.message}</p>}
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Session *</label>
+                  <input type="text" {...register('session')} placeholder="e.g. 2022-23"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm" />
+                  {errors.session && <p className="text-xs text-[#C41230] mt-1">{errors.session.message}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1.5">Why do you want to join? (Optional)</label>
@@ -350,7 +342,6 @@ export default function RegisterPage() {
                     ['Student ID', formValues.student_id],
                     ['Department', formValues.department],
                     ['Session', formValues.session],
-                    ['Batch', formValues.batch],
                     ['Payment Ref', formValues.payment_ref],
                   ].map(([label, value]) => (
                     <div key={label} className="flex justify-between text-sm">

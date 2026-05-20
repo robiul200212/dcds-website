@@ -82,10 +82,6 @@ export function DashboardHome({ profile, attendanceRecords, attendanceRate, tota
                   <span className="text-white">{profile.session || '—'}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-400">Batch</span>
-                  <span className="text-white">{profile.batch || '—'}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-400">Joined</span>
                   <span className="text-white">{profile.joined_at ? formatDate(profile.joined_at, { year: 'numeric', month: 'short' }) : '—'}</span>
                 </div>
