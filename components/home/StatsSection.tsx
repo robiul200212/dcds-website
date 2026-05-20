@@ -35,26 +35,26 @@ const stats = [
 
 export function StatsSection() {
   return (
-    <section className="section-padding bg-[#050D1A] relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0A1628]/50 to-transparent" />
+    <section className="section-padding bg-white relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white" />
       <div className="container-custom relative">
         <div className="text-center mb-12">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-[#1B8FD8]/10 border border-[#1B8FD8]/20 text-[#1B8FD8] text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-[#1B8FD8] text-sm font-bold mb-4 uppercase tracking-wider">
             Our Legacy
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white" style={{ fontFamily: 'var(--font-outfit)' }}>
-            Numbers That Define <span className="gradient-text">DCDS</span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900" style={{ fontFamily: 'var(--font-outfit)' }}>
+            Numbers That Define <span className="bg-gradient-to-r from-[#1B8FD8] to-[#1470B0] bg-clip-text text-transparent">DCDS</span>
           </h2>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
           {stats.map((stat, i) => (
-            <div key={i} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.bg} border border-white/5 p-5 text-center card-hover`}>
-              <div className="absolute top-0 right-0 w-16 h-16 rounded-full blur-2xl opacity-30" style={{ background: stat.color }} />
-              <p className="text-3xl font-extrabold mb-1" style={{ color: stat.color, fontFamily: 'var(--font-outfit)' }}>
+            <div key={i} className={`relative overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-md border border-gray-100 p-5 text-center transition-all duration-300 group hover:-translate-y-1`}>
+              <div className="absolute top-0 right-0 w-16 h-16 rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity" style={{ background: stat.color }} />
+              <p className="text-3xl font-extrabold mb-1.5" style={{ color: stat.color, fontFamily: 'var(--font-outfit)' }}>
                 <Counter end={stat.value} suffix={stat.suffix} />
               </p>
-              <p className="text-sm font-semibold text-white mb-1">{stat.label}</p>
-              <p className="text-xs text-gray-500">{stat.description}</p>
+              <p className="text-sm font-bold text-gray-800 mb-1 leading-tight">{stat.label}</p>
+              <p className="text-xs font-medium text-gray-500">{stat.description}</p>
             </div>
           ))}
         </div>

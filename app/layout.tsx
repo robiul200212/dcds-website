@@ -74,7 +74,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${outfit.variable} antialiased`}>
         <ThemeProvider>
           <Navbar />
-          <main>{children}</main>
+          <main className="pt-20">{children}</main>
           <Footer />
           <Toaster
             position="top-right"

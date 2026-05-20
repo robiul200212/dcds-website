@@ -64,8 +64,8 @@ export function RegistrationsManager() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-white" style={{ fontFamily: 'var(--font-outfit)' }}>Registration Approvals</h1>
-          <p className="text-gray-400 text-sm">Review and approve new member applications</p>
+          <h1 className="text-2xl font-extrabold text-gray-900" style={{ fontFamily: 'var(--font-outfit)' }}>Registration Approvals</h1>
+          <p className="text-gray-500 font-medium text-sm">Review and approve new member applications</p>
         </div>
         <div className="flex gap-2">
           {['pending', 'approved', 'rejected'].map(s => (
@@ -93,12 +93,12 @@ export function RegistrationsManager() {
       ) : (
         <div className="space-y-3">
           {registrations.map(reg => (
-            <div key={reg.id} className={`glass-dark rounded-2xl border overflow-hidden transition-all ${
-              reg.status === 'pending' ? 'border-[#F0C040]/15' : reg.status === 'approved' ? 'border-[#1B6B32]/15' : 'border-[#C41230]/10'
+            <div key={reg.id} className={`bg-white shadow-sm rounded-2xl border overflow-hidden transition-all ${
+              reg.status === 'pending' ? 'border-[#F0C040]/30' : reg.status === 'approved' ? 'border-[#1B6B32]/30' : 'border-[#C41230]/30'
             }`}>
               {/* Header Row */}
               <button onClick={() => setExpandedId(expandedId === reg.id ? null : reg.id)}
-                className="w-full flex items-center justify-between p-5 hover:bg-white/2 transition-colors text-left">
+                className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors text-left">
                 <div className="flex items-center gap-4">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                     reg.status === 'pending' ? 'bg-[#F0C040]/10' : reg.status === 'approved' ? 'bg-[#1B6B32]/10' : 'bg-[#C41230]/10'
@@ -106,8 +106,8 @@ export function RegistrationsManager() {
                     <User className={`w-5 h-5 ${reg.status === 'pending' ? 'text-[#F0C040]' : reg.status === 'approved' ? 'text-[#1B6B32]' : 'text-[#C41230]'}`} />
                   </div>
                   <div>
-                    <p className="font-semibold text-white">{reg.full_name}</p>
-                    <p className="text-xs text-gray-500">{reg.email} • {reg.department} • {reg.session}</p>
+                    <p className="font-bold text-gray-900">{reg.full_name}</p>
+                    <p className="text-xs font-medium text-gray-500">{reg.email} • {reg.department} • {reg.session}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -129,6 +129,8 @@ export function RegistrationsManager() {
                       { icon: BookOpen, label: 'Student ID', value: reg.student_id },
                       { icon: BookOpen, label: 'Department', value: reg.department },
                       { icon: Clock, label: 'Session', value: reg.session },
+                      { icon: CreditCard, label: 'Payment Method', value: reg.payment_method || '—' },
+                      { icon: Phone, label: 'Sender Number', value: reg.payment_sender_number || '—' },
                       { icon: CreditCard, label: 'Payment Ref', value: reg.payment_ref || '—' },
                       { icon: Clock, label: 'Applied', value: formatDate(reg.created_at) },
                     ].map(({ icon: Icon, label, value }) => (
@@ -137,26 +139,17 @@ export function RegistrationsManager() {
                           <Icon className="w-3.5 h-3.5 text-[#1B8FD8]" />
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500">{label}</p>
-                          <p className="text-sm text-white">{value}</p>
+                          <p className="text-xs text-gray-500 font-medium">{label}</p>
+                          <p className="text-sm text-gray-900 font-bold">{value}</p>
                         </div>
                       </div>
                     ))}
                   </div>
 
                   {reg.why_join && (
-                    <div className="mb-4 p-4 rounded-xl bg-white/2 border border-white/5">
-                      <p className="text-xs text-gray-500 mb-1">Why they want to join:</p>
-                      <p className="text-sm text-gray-300">{reg.why_join}</p>
-                    </div>
-                  )}
-
-                  {reg.payment_screenshot_url && (
-                    <div className="mb-4">
-                      <p className="text-xs text-gray-500 mb-2">Payment Screenshot:</p>
-                      <a href={reg.payment_screenshot_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-[#1B8FD8] hover:underline">
-                        <ExternalLink className="w-4 h-4" /> View Screenshot
-                      </a>
+                    <div className="mb-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                      <p className="text-xs text-gray-500 mb-1 font-medium">Why they want to join:</p>
+                      <p className="text-sm text-gray-700">{reg.why_join}</p>
                     </div>
                   )}
 

@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   position              TEXT,   -- Club position e.g. "General Secretary"
   membership_status     TEXT NOT NULL DEFAULT 'pending'
                           CHECK (membership_status IN ('active','inactive','pending','suspended','rejected')),
-  payment_screenshot_url TEXT,
+  payment_method        TEXT,
+  payment_sender_number TEXT,
   payment_ref           TEXT,
   payment_amount        NUMERIC(10,2),
   payment_date          DATE,
@@ -82,7 +83,8 @@ CREATE TABLE IF NOT EXISTS public.registration_requests (
   department            TEXT NOT NULL,
   session               TEXT NOT NULL,
   why_join              TEXT,
-  payment_screenshot_url TEXT,
+  payment_method        TEXT NOT NULL,
+  payment_sender_number TEXT NOT NULL,
   payment_ref           TEXT,
   payment_amount        NUMERIC(10,2),
   status                TEXT NOT NULL DEFAULT 'pending'

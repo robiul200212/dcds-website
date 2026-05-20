@@ -15,7 +15,8 @@ export interface Profile {
   role: UserRole
   position: string | null
   membership_status: MembershipStatus
-  payment_screenshot_url: string | null
+  payment_method: string | null
+  payment_sender_number: string | null
   payment_ref: string | null
   payment_amount: number | null
   payment_date: string | null
@@ -154,7 +155,8 @@ export interface RegistrationRequest {
   department: string
   session: string
   why_join: string | null
-  payment_screenshot_url: string | null
+  payment_method: string
+  payment_sender_number: string
   payment_ref: string | null
   status: 'pending' | 'approved' | 'rejected'
   reviewed_by: string | null

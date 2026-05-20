@@ -21,6 +21,8 @@ const schema = z.object({
   department: z.string().min(2, 'Select your department'),
   session: z.string().min(4, 'Enter your session e.g. 2022-23'),
   why_join: z.string().min(30, 'Please write at least 30 characters').max(500).optional().or(z.literal('')),
+  payment_method: z.string().min(2, 'Select a payment method'),
+  payment_sender_number: z.string().min(11, 'Enter the number you paid from'),
   payment_ref: z.string().min(5, 'Enter your payment reference/transaction ID'),
   agree_terms: z.boolean().refine(v => v === true, 'You must agree to terms'),
 }).refine(d => d.password === d.confirm_password, {
@@ -49,29 +51,16 @@ export default function RegisterPage() {
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [paymentFile, setPaymentFile] = useState<File | null>(null)
-  const [paymentPreview, setPaymentPreview] = useState<string | null>(null)
-
   const { register, handleSubmit, formState: { errors }, watch, trigger } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { agree_terms: false },
   })
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setPaymentFile(file)
-      const reader = new FileReader()
-      reader.onload = (ev) => setPaymentPreview(ev.target?.result as string)
-      reader.readAsDataURL(file)
-    }
-  }
-
   const nextStep = async () => {
     const fieldsPerStep: Record<number, (keyof FormData)[]> = {
       0: ['full_name', 'email', 'password', 'confirm_password'],
       1: ['phone', 'student_id', 'department', 'session'],
-      2: ['payment_ref'],
+      2: ['payment_method', 'payment_sender_number', 'payment_ref'],
     }
     const valid = await trigger(fieldsPerStep[step])
     if (valid) setStep(s => s + 1)
@@ -91,34 +80,21 @@ export default function RegisterPage() {
       const userId = authData.user?.id
       if (!userId) throw new Error('User creation failed')
 
-      // 2. Upload payment screenshot
-      let paymentUrl: string | null = null
-      if (paymentFile) {
-        const ext = paymentFile.name.split('.').pop()
-        const path = `payment-proofs/${userId}.${ext}`
-        const { error: uploadError } = await supabase.storage
-          .from('dcds-media')
-          .upload(path, paymentFile, { upsert: true })
-        if (!uploadError) {
-          const { data: urlData } = supabase.storage.from('dcds-media').getPublicUrl(path)
-          paymentUrl = urlData.publicUrl
-        }
-      }
-
-      // 3. Update profile
+      // 2. Update profile
       const { error: profileError } = await supabase.from('profiles').update({
         full_name: data.full_name,
         phone: data.phone,
         student_id: data.student_id,
         department: data.department,
         session: data.session,
+        payment_method: data.payment_method,
+        payment_sender_number: data.payment_sender_number,
         payment_ref: data.payment_ref,
-        payment_screenshot_url: paymentUrl,
         membership_status: 'pending',
       }).eq('id', userId)
       if (profileError) throw profileError
 
-      // 4. Insert registration request
+      // 3. Insert registration request
       await supabase.from('registration_requests').insert({
         profile_id: userId,
         full_name: data.full_name,
@@ -128,8 +104,9 @@ export default function RegisterPage() {
         department: data.department,
         session: data.session,
         why_join: data.why_join || null,
+        payment_method: data.payment_method,
+        payment_sender_number: data.payment_sender_number,
         payment_ref: data.payment_ref,
-        payment_screenshot_url: paymentUrl,
         status: 'pending',
       })
 
@@ -146,24 +123,19 @@ export default function RegisterPage() {
   const formValues = watch()
 
   return (
-    <div className="min-h-screen bg-[#050D1A] flex items-center justify-center px-4 pt-24 pb-12">
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 right-1/4 w-80 h-80 rounded-full bg-[#1B8FD8]/8 blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/4 w-80 h-80 rounded-full bg-[#F0C040]/5 blur-3xl" />
-      </div>
-
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 pt-32 pb-12">
       <div className="relative w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-4">
-            <div className="w-14 h-14 rounded-full overflow-hidden ring-2 ring-[#1B8FD8]/30 mx-auto">
+            <div className="w-16 h-16 rounded-full overflow-hidden shadow-sm mx-auto bg-white flex items-center justify-center">
               <Image src="/logo.png" alt="DCDS" width={56} height={56} className="object-contain" />
             </div>
           </Link>
-          <h1 className="text-2xl font-extrabold text-white mb-1" style={{ fontFamily: 'var(--font-outfit)' }}>
+          <h1 className="text-3xl font-extrabold text-gray-900 mb-2" style={{ fontFamily: 'var(--font-outfit)' }}>
             Join DCDS
           </h1>
-          <p className="text-gray-400 text-sm">Create your member account</p>
+          <p className="text-gray-600">Create your member account</p>
         </div>
 
         {/* Step Indicator */}
@@ -171,119 +143,119 @@ export default function RegisterPage() {
           {STEPS.map((s, i) => (
             <div key={s} className="flex items-center flex-1">
               <div className="flex flex-col items-center">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                  i < step ? 'bg-[#1B6B32] text-white' : i === step ? 'bg-[#1B8FD8] text-white' : 'bg-white/5 text-gray-500'
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all shadow-sm ${
+                  i < step ? 'bg-[#1B6B32] text-white' : i === step ? 'bg-[#1B8FD8] text-white' : 'bg-white text-gray-400 border border-gray-200'
                 }`}>
-                  {i < step ? <Check className="w-4 h-4" /> : i + 1}
+                  {i < step ? <Check className="w-5 h-5" /> : i + 1}
                 </div>
-                <span className="text-xs mt-1 text-gray-500 hidden sm:block">{s}</span>
+                <span className={`text-xs mt-2 hidden sm:block font-medium ${i <= step ? 'text-gray-900' : 'text-gray-400'}`}>{s}</span>
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-2 transition-all ${i < step ? 'bg-[#1B8FD8]' : 'bg-white/10'}`} />
+                <div className={`flex-1 h-0.5 mx-2 sm:mx-4 transition-all ${i < step ? 'bg-[#1B8FD8]' : 'bg-gray-200'}`} />
               )}
             </div>
           ))}
         </div>
 
         {/* Form Card */}
-        <div className="glass-dark rounded-2xl p-8 border border-[#1B8FD8]/10">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl border border-gray-100">
           <form onSubmit={handleSubmit(onSubmit)}>
 
             {/* Step 0: Account */}
             {step === 0 && (
-              <div className="space-y-4">
-                <h2 className="font-bold text-white mb-5 text-lg">Account Details</h2>
+              <div className="space-y-5">
+                <h2 className="font-bold text-gray-900 mb-6 text-xl">Account Details</h2>
                 {/* Full Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Full Name *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Full Name *</label>
                   <div className="relative">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input type="text" {...register('full_name')} placeholder="Your Full Name"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm" />
+                      className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1B8FD8]/50 focus:border-[#1B8FD8] transition-all" />
                   </div>
-                  {errors.full_name && <p className="text-xs text-[#C41230] mt-1">{errors.full_name.message}</p>}
+                  {errors.full_name && <p className="text-xs text-red-600 mt-1.5 font-medium">{errors.full_name.message}</p>}
                 </div>
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Email Address *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address *</label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input type="email" {...register('email')} placeholder="your@email.com"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm" />
+                      className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1B8FD8]/50 focus:border-[#1B8FD8] transition-all" />
                   </div>
-                  {errors.email && <p className="text-xs text-[#C41230] mt-1">{errors.email.message}</p>}
+                  {errors.email && <p className="text-xs text-red-600 mt-1.5 font-medium">{errors.email.message}</p>}
                 </div>
                 {/* Password */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Password *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password *</label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input type={showPassword ? 'text' : 'password'} {...register('password')} placeholder="Min 8 characters"
-                      className="w-full pl-10 pr-12 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      className="w-full pl-11 pr-12 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1B8FD8]/50 focus:border-[#1B8FD8] transition-all" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
-                  {errors.password && <p className="text-xs text-[#C41230] mt-1">{errors.password.message}</p>}
+                  {errors.password && <p className="text-xs text-red-600 mt-1.5 font-medium">{errors.password.message}</p>}
                 </div>
                 {/* Confirm Password */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Confirm Password *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Confirm Password *</label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input type="password" {...register('confirm_password')} placeholder="Repeat password"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm" />
+                      className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1B8FD8]/50 focus:border-[#1B8FD8] transition-all" />
                   </div>
-                  {errors.confirm_password && <p className="text-xs text-[#C41230] mt-1">{errors.confirm_password.message}</p>}
+                  {errors.confirm_password && <p className="text-xs text-red-600 mt-1.5 font-medium">{errors.confirm_password.message}</p>}
                 </div>
               </div>
             )}
 
             {/* Step 1: Personal */}
             {step === 1 && (
-              <div className="space-y-4">
-                <h2 className="font-bold text-white mb-5 text-lg">Personal Information</h2>
+              <div className="space-y-5">
+                <h2 className="font-bold text-gray-900 mb-6 text-xl">Personal Information</h2>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Phone Number *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone Number *</label>
                   <div className="relative">
-                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <input type="tel" {...register('phone')} placeholder="+880XXXXXXXXXX"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm" />
+                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input type="tel" {...register('phone')} placeholder="01XXXXXXXXX"
+                      className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1B8FD8]/50 focus:border-[#1B8FD8] transition-all" />
                   </div>
-                  {errors.phone && <p className="text-xs text-[#C41230] mt-1">{errors.phone.message}</p>}
+                  {errors.phone && <p className="text-xs text-red-600 mt-1.5 font-medium">{errors.phone.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Student ID *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Student ID *</label>
                   <div className="relative">
-                    <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input type="text" {...register('student_id')} placeholder="Your college student ID"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm" />
+                      className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1B8FD8]/50 focus:border-[#1B8FD8] transition-all" />
                   </div>
-                  {errors.student_id && <p className="text-xs text-[#C41230] mt-1">{errors.student_id.message}</p>}
+                  {errors.student_id && <p className="text-xs text-red-600 mt-1.5 font-medium">{errors.student_id.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Department *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Department *</label>
                   <div className="relative">
-                    <BookOpen className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <BookOpen className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <select {...register('department')}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#0A1628] border border-white/10 text-white focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm appearance-none">
+                      className="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1B8FD8]/50 focus:border-[#1B8FD8] transition-all appearance-none">
                       <option value="">Select Department</option>
                       {departments.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
                   </div>
-                  {errors.department && <p className="text-xs text-[#C41230] mt-1">{errors.department.message}</p>}
+                  {errors.department && <p className="text-xs text-red-600 mt-1.5 font-medium">{errors.department.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Session *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Session *</label>
                   <input type="text" {...register('session')} placeholder="e.g. 2022-23"
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm" />
-                  {errors.session && <p className="text-xs text-[#C41230] mt-1">{errors.session.message}</p>}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1B8FD8]/50 focus:border-[#1B8FD8] transition-all" />
+                  {errors.session && <p className="text-xs text-red-600 mt-1.5 font-medium">{errors.session.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Why do you want to join? (Optional)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Why do you want to join? (Optional)</label>
                   <textarea {...register('why_join')} rows={3} placeholder="Tell us why you want to join DCDS..."
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm resize-none" />
-                  {errors.why_join && <p className="text-xs text-[#C41230] mt-1">{errors.why_join.message}</p>}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1B8FD8]/50 focus:border-[#1B8FD8] transition-all resize-none" />
+                  {errors.why_join && <p className="text-xs text-red-600 mt-1.5 font-medium">{errors.why_join.message}</p>}
                 </div>
               </div>
             )}
@@ -291,50 +263,50 @@ export default function RegisterPage() {
             {/* Step 2: Payment */}
             {step === 2 && (
               <div className="space-y-5">
-                <h2 className="font-bold text-white mb-2 text-lg">Membership Payment</h2>
+                <h2 className="font-bold text-gray-900 mb-6 text-xl">Membership Payment</h2>
+                
                 {/* Payment Instructions */}
-                <div className="p-4 rounded-xl bg-[#F0C040]/5 border border-[#F0C040]/20">
-                  <p className="text-sm font-semibold text-[#F0C040] mb-2">💰 Payment Instructions</p>
-                  <div className="space-y-1 text-xs text-gray-400">
-                    <p>• Membership Fee: <span className="text-white font-semibold">BDT 500</span></p>
-                    <p>• Send via <span className="text-white">bKash / Nagad</span> to: <span className="text-[#F0C040] font-mono">01XXXXXXXXX</span></p>
-                    <p>• Keep your transaction ID / screenshot</p>
+                <div className="p-5 rounded-xl bg-blue-50 border border-blue-100">
+                  <p className="text-sm font-bold text-[#1B8FD8] mb-3 flex items-center gap-2">💰 Payment Instructions</p>
+                  <div className="space-y-2 text-sm text-gray-700 font-medium">
+                    <p>• Membership Fee: <span className="font-bold text-gray-900">BDT 500</span></p>
+                    <p>• <span className="font-bold text-pink-600">bKash</span> Send Money: <span className="font-bold text-gray-900 font-mono">01560005203</span></p>
+                    <p>• <span className="font-bold text-orange-500">Nagad</span> Send Money: <span className="font-bold text-gray-900 font-mono">01991334397</span></p>
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Transaction ID / Reference *</label>
-                  <input type="text" {...register('payment_ref')} placeholder="e.g. 8N7A2KXXXX"
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#1B8FD8]/50 transition-all text-sm font-mono" />
-                  {errors.payment_ref && <p className="text-xs text-[#C41230] mt-1">{errors.payment_ref.message}</p>}
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Payment Method *</label>
+                  <select {...register('payment_method')}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1B8FD8]/50 focus:border-[#1B8FD8] transition-all">
+                    <option value="">Select Method</option>
+                    <option value="bKash">bKash</option>
+                    <option value="Nagad">Nagad</option>
+                  </select>
+                  {errors.payment_method && <p className="text-xs text-red-600 mt-1.5 font-medium">{errors.payment_method.message}</p>}
                 </div>
-                {/* Payment Screenshot Upload */}
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1.5">Payment Screenshot (Optional but recommended)</label>
-                  {paymentPreview ? (
-                    <div className="relative rounded-xl overflow-hidden border border-[#1B8FD8]/20">
-                      <img src={paymentPreview} alt="Payment proof" className="w-full max-h-48 object-cover" />
-                      <button type="button" onClick={() => { setPaymentFile(null); setPaymentPreview(null); }}
-                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-[#C41230] flex items-center justify-center hover:bg-[#C41230]/80 transition-colors">
-                        <X className="w-4 h-4 text-white" />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="flex flex-col items-center justify-center gap-2 py-8 rounded-xl border-2 border-dashed border-white/10 cursor-pointer hover:border-[#1B8FD8]/30 hover:bg-white/2 transition-all">
-                      <Upload className="w-8 h-8 text-gray-500" />
-                      <span className="text-sm text-gray-400">Click to upload screenshot</span>
-                      <span className="text-xs text-gray-600">PNG, JPG up to 5MB</span>
-                      <input type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-                    </label>
-                  )}
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Paid Using Which Number? *</label>
+                  <input type="text" {...register('payment_sender_number')} placeholder="e.g. 01XXXXXXXXX"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1B8FD8]/50 focus:border-[#1B8FD8] transition-all font-mono" />
+                  {errors.payment_sender_number && <p className="text-xs text-red-600 mt-1.5 font-medium">{errors.payment_sender_number.message}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Transaction ID / Reference *</label>
+                  <input type="text" {...register('payment_ref')} placeholder="e.g. 8N7A2KXXXX"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1B8FD8]/50 focus:border-[#1B8FD8] transition-all font-mono" />
+                  {errors.payment_ref && <p className="text-xs text-red-600 mt-1.5 font-medium">{errors.payment_ref.message}</p>}
                 </div>
               </div>
             )}
 
             {/* Step 3: Review */}
             {step === 3 && (
-              <div>
-                <h2 className="font-bold text-white mb-5 text-lg">Review & Submit</h2>
-                <div className="space-y-3 mb-5">
+              <div className="space-y-6">
+                <h2 className="font-bold text-gray-900 mb-2 text-xl">Review & Submit</h2>
+                <div className="bg-gray-50 rounded-xl p-5 space-y-4 border border-gray-200">
                   {[
                     ['Full Name', formValues.full_name],
                     ['Email', formValues.email],
@@ -342,58 +314,54 @@ export default function RegisterPage() {
                     ['Student ID', formValues.student_id],
                     ['Department', formValues.department],
                     ['Session', formValues.session],
-                    ['Payment Ref', formValues.payment_ref],
+                    ['Payment Method', formValues.payment_method],
+                    ['Sender Number', formValues.payment_sender_number],
+                    ['Transaction ID', formValues.payment_ref],
                   ].map(([label, value]) => (
-                    <div key={label} className="flex justify-between text-sm">
-                      <span className="text-gray-400">{label}</span>
-                      <span className="text-white font-medium text-right max-w-[200px] truncate">{value}</span>
+                    <div key={label} className="flex justify-between text-sm border-b border-gray-200 pb-2 last:border-0 last:pb-0">
+                      <span className="text-gray-500 font-medium">{label}</span>
+                      <span className="text-gray-900 font-bold text-right max-w-[200px] truncate">{value}</span>
                     </div>
                   ))}
-                  {paymentPreview && (
-                    <div className="text-sm flex justify-between">
-                      <span className="text-gray-400">Payment Screenshot</span>
-                      <span className="text-[#1B6B32] font-medium">✓ Uploaded</span>
-                    </div>
-                  )}
                 </div>
 
                 {/* Terms */}
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input type="checkbox" {...register('agree_terms')} className="mt-0.5 w-4 h-4 rounded accent-[#1B8FD8]" />
-                  <span className="text-xs text-gray-400 leading-relaxed">
+                <label className="flex items-start gap-3 cursor-pointer p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
+                  <input type="checkbox" {...register('agree_terms')} className="mt-1 w-4 h-4 rounded text-[#1B8FD8] focus:ring-[#1B8FD8] border-gray-300" />
+                  <span className="text-sm text-gray-600 leading-relaxed font-medium">
                     I agree to DCDS terms and conditions, and confirm that the information provided is accurate.
                     I understand my registration is subject to approval.
                   </span>
                 </label>
-                {errors.agree_terms && <p className="text-xs text-[#C41230] mt-2">{errors.agree_terms.message}</p>}
+                {errors.agree_terms && <p className="text-xs text-red-600 mt-2 font-medium px-4">{errors.agree_terms.message}</p>}
               </div>
             )}
 
             {/* Navigation Buttons */}
-            <div className="flex gap-3 mt-7">
+            <div className="flex gap-4 mt-8">
               {step > 0 && (
                 <button type="button" onClick={() => setStep(s => s - 1)}
-                  className="flex-1 py-3 rounded-xl font-medium text-gray-300 glass border border-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-1">
-                  <ChevronLeft className="w-4 h-4" /> Back
+                  className="flex-1 py-3.5 rounded-xl font-bold text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-2">
+                  <ChevronLeft className="w-5 h-5" /> Back
                 </button>
               )}
               {step < STEPS.length - 1 ? (
                 <button type="button" onClick={nextStep}
-                  className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-[#1B8FD8] to-[#1470B0] hover:shadow-lg hover:shadow-[#1B8FD8]/30 transition-all flex items-center justify-center gap-1">
-                  Next <ChevronRight className="w-4 h-4" />
+                  className="flex-1 py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#1B8FD8] to-[#1470B0] hover:shadow-lg hover:shadow-[#1B8FD8]/30 transition-all flex items-center justify-center gap-2">
+                  Next <ChevronRight className="w-5 h-5" />
                 </button>
               ) : (
                 <button type="submit" disabled={loading}
-                  className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-[#1B6B32] to-[#145228] hover:shadow-lg hover:shadow-[#1B6B32]/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
-                  {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : '🎉 Submit Registration'}
+                  className="flex-1 py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#1B6B32] to-[#145228] hover:shadow-lg hover:shadow-[#1B6B32]/30 disabled:opacity-70 transition-all flex items-center justify-center gap-2">
+                  {loading ? <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" /> : '🎉 Submit'}
                 </button>
               )}
             </div>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-5">
+          <p className="text-center text-sm text-gray-600 mt-8 font-medium">
             Already a member?{' '}
-            <Link href="/auth/login" className="text-[#1B8FD8] font-semibold hover:underline">Sign In</Link>
+            <Link href="/auth/login" className="text-[#1B8FD8] font-bold hover:underline">Sign In</Link>
           </p>
         </div>
       </div>

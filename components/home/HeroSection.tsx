@@ -38,28 +38,28 @@ export function HeroSection() {
   }, [displayText, isDeleting, currentWord])
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#050D1A]">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-blue-50/50 to-white">
       {/* Animated Background */}
       <div className="absolute inset-0">
         {/* Gradient orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#1B8FD8]/15 blur-3xl animate-pulse" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#1B8FD8]/10 blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-[#F0C040]/10 blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-[#C41230]/10 blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-[#1B6B32]/5 blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
 
         {/* Grid pattern */}
         <div
-          className="absolute inset-0 opacity-5"
+          className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: `linear-gradient(rgba(27,143,216,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(27,143,216,0.5) 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(rgba(27,143,216,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(27,143,216,0.2) 1px, transparent 1px)`,
             backgroundSize: '60px 60px',
           }}
         />
 
         {/* Animated particles */}
-        {[...Array(20)].map((_, i) => (
+        {[...Array(15)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 rounded-full bg-[#1B8FD8]/40"
+            className="absolute w-1.5 h-1.5 rounded-full bg-[#1B8FD8]/30"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -77,7 +77,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-[#1B8FD8]/30 text-sm text-[#1B8FD8] font-medium mb-8"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-sm border border-blue-100 text-sm text-[#1B8FD8] font-bold mb-8"
         >
           <Star className="w-4 h-4 text-[#F0C040]" fill="currentColor" />
           Bangladesh&apos;s Premier Debate Club at Dhaka College
@@ -92,8 +92,8 @@ export function HeroSection() {
           className="flex justify-center mb-8"
         >
           <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-[#1B8FD8]/20 blur-2xl scale-150" />
-            <div className="relative w-32 h-32 rounded-full overflow-hidden ring-4 ring-[#F0C040]/40 ring-offset-4 ring-offset-[#050D1A] shadow-2xl shadow-[#1B8FD8]/30">
+            <div className="absolute inset-0 rounded-full bg-[#1B8FD8]/10 blur-2xl scale-150" />
+            <div className="relative w-32 h-32 rounded-full overflow-hidden bg-white ring-4 ring-white shadow-2xl shadow-[#1B8FD8]/20 flex items-center justify-center p-4">
               <Image
                 src="/logo.png"
                 alt="DCDS Logo"
@@ -111,13 +111,13 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-4 leading-tight"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 mb-4 leading-tight"
           style={{ fontFamily: 'var(--font-outfit)' }}
         >
           We Build
           <br />
-          <span className="gradient-text-gold">{displayText}</span>
-          <span className="animate-pulse text-[#F0C040]">|</span>
+          <span className="bg-gradient-to-r from-[#1B8FD8] to-[#1470B0] bg-clip-text text-transparent">{displayText}</span>
+          <span className="animate-pulse text-[#1B8FD8]">|</span>
         </motion.h1>
 
         {/* Sub-headline */}
@@ -125,7 +125,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed"
+          className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed font-medium"
         >
           Dhaka College Debating Society — Fostering critical thinking, public speaking,
           and leadership excellence since 1995.
@@ -140,14 +140,14 @@ export function HeroSection() {
         >
           <Link
             href="/auth/register"
-            className="group flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-[#1B8FD8] to-[#1470B0] hover:shadow-2xl hover:shadow-[#1B8FD8]/40 transition-all duration-300 hover:scale-105"
+            className="group flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-[#1B8FD8] to-[#1470B0] shadow-lg hover:shadow-xl hover:shadow-[#1B8FD8]/30 transition-all duration-300 hover:-translate-y-1"
           >
             Join DCDS Today
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
             href="/about"
-            className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-white glass border border-white/10 hover:border-[#1B8FD8]/40 hover:bg-white/5 transition-all duration-300"
+            className="flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-gray-700 bg-white border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 hover:text-[#1B8FD8] transition-all duration-300"
           >
             Discover DCDS
           </Link>
@@ -158,7 +158,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto mt-16"
+          className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto mt-16"
         >
           {[
             { icon: Trophy, value: '50+', label: 'Championships', color: '#F0C040' },
@@ -166,10 +166,12 @@ export function HeroSection() {
             { icon: Calendar, value: '30+', label: 'Years Active', color: '#1B6B32' },
             { icon: Star, value: '100+', label: 'Events Hosted', color: '#C41230' },
           ].map((stat, i) => (
-            <div key={i} className="glass border border-white/5 rounded-xl p-4 text-center card-hover">
-              <stat.icon className="w-6 h-6 mx-auto mb-2" style={{ color: stat.color }} />
-              <p className="text-2xl font-extrabold text-white" style={{ fontFamily: 'var(--font-outfit)' }}>{stat.value}</p>
-              <p className="text-xs text-gray-400">{stat.label}</p>
+            <div key={i} className="bg-white border border-gray-100 shadow-sm hover:shadow-md rounded-xl p-5 text-center transition-all duration-300 group hover:-translate-y-1">
+              <div className="w-12 h-12 mx-auto rounded-full bg-gray-50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                <stat.icon className="w-6 h-6" style={{ color: stat.color }} />
+              </div>
+              <p className="text-3xl font-extrabold text-gray-900 mb-1" style={{ fontFamily: 'var(--font-outfit)' }}>{stat.value}</p>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{stat.label}</p>
             </div>
           ))}
         </motion.div>
@@ -179,10 +181,10 @@ export function HeroSection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-gray-500"
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-gray-400"
         >
-          <span className="text-xs">Scroll to explore</span>
-          <ChevronDown className="w-5 h-5 animate-bounce" />
+          <span className="text-xs font-semibold uppercase tracking-wider">Scroll</span>
+          <ChevronDown className="w-5 h-5 animate-bounce text-[#1B8FD8]" />
         </motion.div>
       </div>
     </section>
